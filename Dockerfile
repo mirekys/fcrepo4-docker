@@ -16,6 +16,7 @@ RUN apt-get install -y \
 	software-properties-common \
 	vim \
 	wget \
+	default-jdk \
 	htop tree zsh fish
 
 ENV CATALINA_HOME /usr/local/tomcat
@@ -35,9 +36,16 @@ RUN sed -i '$i<role rolename="fedoraUser"/>$i<role rolename="fedoraAdmin"/>$i<ro
 RUN echo 'JAVA_OPTS="$JAVA_OPTS -Dfcrepo.modeshape.configuration=classpath:/config/'$ModeshapeConfig'/repository.json '$JDBCConfig' -Dfcrepo.home=/mnt/ingest -Dfcrepo.audit.container=/audit"' > $CATALINA_HOME/bin/setenv.sh \
 	&& chmod +x $CATALINA_HOME/bin/setenv.sh
 
-RUN cd /tmp \
-	&& curl -fSL https://github.com/fcrepo4-exts/fcrepo-webapp-plus/releases/download/fcrepo-webapp-plus-$FEDORA_TAG/fcrepo-webapp-plus-$FedoraConfig$FEDORA_VERSION.war -o fcrepo.war \
-	&& cp fcrepo.war /usr/local/tomcat/webapps/fcrepo.war
+
+RUN mkdir /tmp/fcrepo && cd /tmp/ \
+	&& curl -fSL https://github.com/fcrepo4-exts/fcrepo-webapp-plus/releases/download/fcrepo-webapp-plus-$FEDORA_TAG/fcrepo-webapp-plus-$FedoraConfig$FEDORA_VERSION.war -o fcrepo.war
+
+# Patch the fedora.war with custom patches and repackage
+COPY patch/repo.xml.delegateprincipal.patch /tmp/repo.xml.delegateprincipal.patch
+RUN cd /tmp/fcrepo && jar -xf /tmp/fcrepo.war
+RUN cd /tmp/fcrepo && patch -p1 < /tmp/repo.xml.delegateprincipal.patch
+RUN cd /tmp/fcrepo && jar -cf /tmp/fcrepo.war .
+RUN cp /tmp/fcrepo.war /usr/local/tomcat/webapps/fcrepo.war
 
 # Install Solr
 ENV SOLR_VERSION 4.10.3

@@ -1,0 +1,11 @@
+--- a/WEB-INF/classes/spring/repo.xml	2018-02-12 16:11:50.000000000 +0100
++++ b/WEB-INF/classes/spring/repo.xml	2018-08-16 13:52:46.297938135 +0200
+@@ -21,4 +21,8 @@
+     <bean class="org.fcrepo.metrics.MetricsConfig"/>
+ 
+     <bean id="connectionManager" class="org.apache.http.impl.conn.PoolingHttpClientConnectionManager" />
++
++    <bean name="delegatedPrincipalProvider" class="org.fcrepo.auth.common.DelegateHeaderPrincipalProvider"/>
++    <bean name="authenticationProvider" class="org.fcrepo.auth.common.ServletContainerAuthenticationProvider"
++          p:fad-ref="fad" p:principalProviders-ref="delegatedPrincipalProvider"/>
+ </beans>
