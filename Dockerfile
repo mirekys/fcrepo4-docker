@@ -3,6 +3,7 @@ FROM tomcat:8.0-jre8
 MAINTAINER Yinlin Chen "ylchen@vt.edu"
 
 ARG FedoraConfig=
+ARG FusekiConfig=enable
 ARG ModeshapeConfig=file-simple
 
 # Install essential packages
@@ -70,20 +71,20 @@ ENV FUSEKI_VERSION 2.3.1
 ENV FUSEKI_BASE /etc/fuseki
 ENV FUSEKI_DEPLOY /usr/local/tomcat/webapps
 
-RUN cd && mkdir -p "$FUSEKI_BASE" \ 
+RUN if [ "$FusekiConfig" != "disable" ]; then cd && mkdir -p "$FUSEKI_BASE" \ 
 	&& mkdir -p "$FUSEKI_BASE"/configuration \
 	&& cd /tmp \
 	&& curl -fSL http://archive.apache.org/dist/jena/binaries/apache-jena-fuseki-$FUSEKI_VERSION.tar.gz -o apache-jena-fuseki-$FUSEKI_VERSION.tar.gz \
 	&& tar -xzvf apache-jena-fuseki-$FUSEKI_VERSION.tar.gz \
 	&& mv apache-jena-fuseki-"$FUSEKI_VERSION" jena-fuseki1-"$FUSEKI_VERSION" \
 	&& cd jena-fuseki1-"$FUSEKI_VERSION" \
-	&& mv -v fuseki.war $FUSEKI_DEPLOY
+	&& mv -v fuseki.war $FUSEKI_DEPLOY; fi
 
 COPY config/shiro.ini /root/
 COPY config/test.ttl /root/
 
-RUN cp /root/shiro.ini  /etc/fuseki/. \
-	&& cp /root/test.ttl  /etc/fuseki/configuration/.
+RUN if [ "$FusekiConfig" != "disable" ]; then cp /root/shiro.ini  /etc/fuseki/. \
+	&& cp /root/test.ttl  /etc/fuseki/configuration/.; fi
 
 # Install Apache Karaf
 ENV KARAF_VERSION 4.0.5
