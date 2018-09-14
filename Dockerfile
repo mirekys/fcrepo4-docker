@@ -16,6 +16,7 @@ RUN apt-get install -y \
 	software-properties-common \
 	vim \
 	wget \
+	default-jdk \
 	htop tree zsh fish
 
 ENV CATALINA_HOME /usr/local/tomcat
@@ -37,7 +38,12 @@ RUN echo 'JAVA_OPTS="$JAVA_OPTS -Dfcrepo.modeshape.configuration=classpath:/conf
 
 RUN cd /tmp \
 	&& curl -fSL https://github.com/fcrepo4-exts/fcrepo-webapp-plus/releases/download/fcrepo-webapp-plus-$FEDORA_TAG/fcrepo-webapp-plus-$FedoraConfig$FEDORA_VERSION.war -o fcrepo.war \
-	&& cp fcrepo.war /usr/local/tomcat/webapps/fcrepo.war
+	&& mkdir fcrepo && cd /tmp/fcrepo && jar -xf /tmp/fcrepo.war
+RUN cd /tmp/fcrepo && sed -i -e 's/fedora-node-types.cnd/\/etc\/fcrepo\/fedora-node-types.cnd/g' WEB-INF/classes/config/$ModeshapeConfig/repository.json && jar -cf /tmp/fcrepo.war .
+
+RUN cd /tmp && cp fcrepo.war /usr/local/tomcat/webapps/fcrepo.war && mkdir /etc/fcrepo
+
+COPY config/fedora-node-types.cnd /etc/fcrepo/fedora-node-types.cnd
 
 # Install Solr
 ENV SOLR_VERSION 4.10.3
