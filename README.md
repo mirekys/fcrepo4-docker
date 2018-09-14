@@ -90,6 +90,11 @@ To enable Fedora 4 with WebAC and Audit capability.
 docker build --build-arg FedoraConfig=webac-audit- --build-arg ModeshapeConfig=servlet-auth -t="tag-webac-audit" .
 ```
 
+To build Fedora 4 without Fuseki
+```
+docker build --build-arg FusekiConfig=disable -t="nofuseki" .
+```
+
 ## Maintainers
 
 Current maintainers:
