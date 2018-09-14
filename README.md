@@ -95,6 +95,11 @@ To build Fedora 4 without Fuseki
 docker build --build-arg FusekiConfig=disable -t="nofuseki" .
 ```
 
+To build Fedora 4 without Solr
+```
+docker build --build-arg SolrConfig=disable -t="nosolr" .
+```
+
 ## Maintainers
 
 Current maintainers:

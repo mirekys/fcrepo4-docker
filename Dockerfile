@@ -3,6 +3,7 @@ FROM tomcat:8.0-jre8
 MAINTAINER Yinlin Chen "ylchen@vt.edu"
 
 ARG FedoraConfig=
+ARG SolrConfig=
 ARG FusekiConfig=enable
 ARG ModeshapeConfig=file-simple
 
@@ -50,7 +51,7 @@ COPY config/fedora-node-types.cnd /etc/fcrepo/fedora-node-types.cnd
 ENV SOLR_VERSION 4.10.3
 ENV SOLR_HOME /usr/local/tomcat/solr
 
-RUN cd /tmp \
+RUN if [ "$SolrConfig" != "disable" ]; then cd /tmp \
 	&& mkdir -p /var/lib/tomcat/fcrepo4-data \
 	&& chmod g-w /var/lib/tomcat/fcrepo4-data \
 	&& curl -fSL http://archive.apache.org/dist/lucene/solr/$SOLR_VERSION/solr-$SOLR_VERSION.tgz -o solr-$SOLR_VERSION.tgz \
@@ -62,7 +63,7 @@ RUN cd /tmp \
 	&& cp /tmp/solr-"$SOLR_VERSION"/example/lib/ext/slf4j* /usr/local/tomcat/lib \
 	&& cp /tmp/solr-"$SOLR_VERSION"/example/lib/ext/log4j* /usr/local/tomcat/lib \
 	&& cp -Rv /tmp/solr-"$SOLR_VERSION"/example/solr/* $SOLR_HOME \
-	&& touch /var/lib/tomcat/velocity.log
+	&& touch /var/lib/tomcat/velocity.log; fi
 
 COPY config/schema.xml $SOLR_HOME/collection1/conf/
 
